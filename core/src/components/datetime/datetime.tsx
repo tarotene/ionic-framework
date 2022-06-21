@@ -99,18 +99,18 @@ export class Datetime implements ComponentInterface {
    * Duplicate reference to `activeParts` that does not trigger a re-render of the component.
    * Allows caching an instance of the `activeParts` in between render cycles.
    */
-  private activePartsClone!: DatetimeParts;
+  private activePartsClone!: DatetimeParts[];
 
   @State() showMonthAndYear = false;
 
-  @State() activeParts: DatetimeParts = {
+  @State() activeParts: DatetimeParts[] = [{
     month: 5,
     day: 28,
     year: 2021,
     hour: 13,
     minute: 52,
     ampm: 'pm',
-  };
+  }];
 
   @State() workingParts: DatetimeParts = {
     month: 5,
@@ -336,15 +336,15 @@ export class Datetime implements ComponentInterface {
         const { month, day, year, hour, minute } = valueDateParts;
         const ampm = hour >= 12 ? 'pm' : 'am';
 
-        this.activePartsClone = {
-          ...this.activeParts,
+        this.activePartsClone = [{
+          ...this.activeParts[0],
           month,
           day,
           year,
           hour,
           minute,
           ampm,
-        };
+        }];
 
         /**
          * The working parts am/pm value must be updated when the value changes, to
@@ -480,7 +480,7 @@ export class Datetime implements ComponentInterface {
        * there can be 1 hr difference when dealing w/ DST
        */
       const date = new Date(convertDataToISO(this.activeParts));
-      this.activeParts.tzOffset = date.getTimezoneOffset() * -1;
+      this.activeParts[0].tzOffset = date.getTimezoneOffset() * -1;
 
       this.value = convertDataToISO(this.activeParts);
     }
@@ -532,9 +532,10 @@ export class Datetime implements ComponentInterface {
   };
 
   private setActiveParts = (parts: DatetimeParts) => {
-    this.activeParts = {
+    this.activeParts = [{
+      ...this.activeParts[0],
       ...parts,
-    };
+    }];
 
     const hasSlottedButtons = this.el.querySelector('[slot="buttons"]') !== null;
     if (hasSlottedButtons || this.showDefaultButtons) {
@@ -1118,7 +1119,7 @@ export class Datetime implements ComponentInterface {
       ampm,
     });
 
-    this.activeParts = {
+    this.activeParts = [{
       month,
       day,
       year,
@@ -1126,7 +1127,7 @@ export class Datetime implements ComponentInterface {
       minute,
       tzOffset,
       ampm,
-    };
+    }];
   };
 
   componentWillLoad() {
@@ -1391,7 +1392,7 @@ export class Datetime implements ComponentInterface {
           });
 
           this.setActiveParts({
-            ...this.activeParts,
+            ...this.activeParts[0],
             ...findPart,
           });
 
@@ -1478,7 +1479,7 @@ export class Datetime implements ComponentInterface {
           });
 
           this.setActiveParts({
-            ...this.activeParts,
+            ...this.activeParts[0],
             day: ev.detail.value,
           });
 
@@ -1519,7 +1520,7 @@ export class Datetime implements ComponentInterface {
           });
 
           this.setActiveParts({
-            ...this.activeParts,
+            ...this.activeParts[0],
             month: ev.detail.value,
           });
 
@@ -1559,7 +1560,7 @@ export class Datetime implements ComponentInterface {
           });
 
           this.setActiveParts({
-            ...this.activeParts,
+            ...this.activeParts[0],
             year: ev.detail.value,
           });
 
@@ -1601,7 +1602,7 @@ export class Datetime implements ComponentInterface {
     return (
       <ion-picker-column-internal
         color={this.color}
-        value={activePartsClone.hour}
+        value={activePartsClone[0].hour}
         items={hoursData}
         numericInput
         onIonChange={(ev: CustomEvent) => {
@@ -1610,7 +1611,7 @@ export class Datetime implements ComponentInterface {
             hour: ev.detail.value,
           });
           this.setActiveParts({
-            ...activePartsClone,
+            ...activePartsClone[0],
             hour: ev.detail.value,
           });
 
@@ -1626,7 +1627,7 @@ export class Datetime implements ComponentInterface {
     return (
       <ion-picker-column-internal
         color={this.color}
-        value={activePartsClone.minute}
+        value={activePartsClone[0].minute}
         items={minutesData}
         numericInput
         onIonChange={(ev: CustomEvent) => {
@@ -1635,7 +1636,7 @@ export class Datetime implements ComponentInterface {
             minute: ev.detail.value,
           });
           this.setActiveParts({
-            ...activePartsClone,
+            ...activePartsClone[0],
             minute: ev.detail.value,
           });
 
@@ -1656,7 +1657,7 @@ export class Datetime implements ComponentInterface {
       <ion-picker-column-internal
         style={isDayPeriodRTL ? { order: '-1' } : {}}
         color={this.color}
-        value={activePartsClone.ampm}
+        value={activePartsClone[0].ampm}
         items={dayPeriodData}
         onIonChange={(ev: CustomEvent) => {
           const hour = calculateHourFromAMPM(workingParts, ev.detail.value);
@@ -1668,7 +1669,7 @@ export class Datetime implements ComponentInterface {
           });
 
           this.setActiveParts({
-            ...activePartsClone,
+            ...activePartsClone[0],
             ampm: ev.detail.value,
             hour,
           });
@@ -1776,7 +1777,7 @@ export class Datetime implements ComponentInterface {
             const { isActive, isToday, ariaLabel, ariaSelected, disabled } = getCalendarDayState(
               this.locale,
               referenceParts,
-              this.activePartsClone,
+              this.activePartsClone[0],
               this.todayParts,
               this.minParts,
               this.maxParts,
@@ -1911,7 +1912,7 @@ export class Datetime implements ComponentInterface {
           }
         }}
       >
-        {getLocalizedTime(this.locale, this.activePartsClone, use24Hour)}
+        {getLocalizedTime(this.locale, this.activePartsClone[0], use24Hour)}
       </button>,
       <ion-popover
         alignment="center"
@@ -1955,7 +1956,7 @@ export class Datetime implements ComponentInterface {
         <div class="datetime-title">
           <slot name="title">Select Date</slot>
         </div>
-        {mode === 'md' && <div class="datetime-selected-date">{getMonthAndDay(this.locale, this.activeParts)}</div>}
+        {mode === 'md' && <div class="datetime-selected-date">{getMonthAndDay(this.locale, this.activeParts[0])}</div>}
       </div>
     );
   }
